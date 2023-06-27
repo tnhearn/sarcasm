@@ -3,6 +3,8 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+import numpy as np
 
 # Load data
 data_path = "/Users/thear/Documents/Code/sarcasm/" \
@@ -54,13 +56,14 @@ print()
 print(train_padded[0])
 print(train_padded.shape)
 
-
-import numpy as np
+# Convert data to Numpy arrays for input to Tensorflow
 train_padded = np.array(train_padded)
-train_labels = np.array(y_train)
+y_train = np.array(y_train)
 test_padded = np.array(test_padded)
-test_labels = np.array(y_test)
+y_test = np.array(y_test)
 
+
+# Create model
 EMBEDDING_DIM = 16
 model = tf.keras.Sequential([
     tf.keras.layers.Embedding(
@@ -83,17 +86,39 @@ model.compile(
     optimizer = 'adam',
     metrics = ['accuracy'])
 
+# Print model summary
 model.summary()
 
+# Train model
 N_EPOCHS = 30
 history = model.fit(
     train_padded, 
-    train_labels, 
+    y_train, 
     epochs = N_EPOCHS, 
     validation_data = (test_padded, y_test), 
     verbose = 2)
 
+# Plot model performance
+def plot_graphs(history, string):
+  plt.plot(history.history[string])
+  plt.plot(history.history['val_' + string])
+  plt.title("Sarcasm Classifier " + string)
+  plt.xlabel("Epochs")
+  plt.ylabel(string)
+  plt.legend([string, 'val_' + string])
+  plt.show()
+  
+plot_graphs(history, "accuracy")
+plot_graphs(history, "loss")
 
-
-
+# Test model with some new sentences
+sentence = ["Are you really going to wear that?", 
+            "You are my oldest sister"]
+sequences = tokenizer.texts_to_sequences(sentence)
+padded = pad_sequences(
+    sequences, 
+    maxlen = MAX_LENGTH, 
+    padding = 'post', 
+    truncating = 'post')
+print(model.predict(padded))
 
