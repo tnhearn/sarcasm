@@ -67,19 +67,33 @@ model = tf.keras.Sequential([
     tf.keras.layers.Embedding(
         VOCAB_SIZE, 
         EMBEDDING_DIM, 
-        input_length = MAX_LENGTH),
-    tf.keras.layers.GlobalAveragePooling1D(),
-    tf.keras.layers.Dense(
+        input_length = MAX_LENGTH,
+        mask_zero = True),
+    # tf.keras.layers.GlobalAveragePooling1D(),
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(
         16, 
-        activation = 'relu'),
+        activation = 'tanh',
+        kernel_regularizer = tf.keras.regularizers.L2(0.18))),
+    # tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(32)),
     tf.keras.layers.Dropout(0.2),
     tf.keras.layers.Dense(
-        8, 
-        activation = 'relu'),
+        16, 
+        activation = 'relu',
+        kernel_regularizer = tf.keras.regularizers.L1L2(
+            l1 = 0.18, 
+            l2 = 0.18)),
     tf.keras.layers.Dense(
         1, 
-        activation = 'sigmoid')
-])
+        activation = 'sigmoid')])
+
+# Add EarlyStopping for effiency
+early_stop = tf.keras.callbacks.EarlyStopping(
+    monitor = 'val_accuracy', 
+    mode = 'min',
+    verbose = 1,
+    patience = 20
+    )
+
 model.compile(
     loss = 'binary_crossentropy',
     optimizer = 'adam',
@@ -90,11 +104,16 @@ model.summary()
 
 # Train model
 N_EPOCHS = 30
+N_BATCH = 200
 history = model.fit(
     train_padded, 
     y_train, 
     epochs = N_EPOCHS, 
-    validation_data = (test_padded, y_test), 
+    validation_data = (test_padded, y_test),
+    validation_split = 0.2,
+    callbacks = early_stop,
+    batch_size = N_BATCH,
+    shuffle = True,
     verbose = 2)
 
 # Plot model performance
