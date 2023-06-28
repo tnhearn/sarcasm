@@ -70,7 +70,11 @@ model = tf.keras.Sequential([
         input_length = MAX_LENGTH),
     tf.keras.layers.GlobalAveragePooling1D(),
     tf.keras.layers.Dense(
-        24, 
+        16, 
+        activation = 'relu'),
+    tf.keras.layers.Dropout(0.2),
+    tf.keras.layers.Dense(
+        8, 
         activation = 'relu'),
     tf.keras.layers.Dense(
         1, 
@@ -118,9 +122,9 @@ new_padded = pad_sequences(
     padding = 'post', 
     truncating = 'post')
 
-if model.predict(new_padded) >= 50:
+if model.predict(new_padded) >= 0.5:
     print('\n That sounds like sarcasm')
-elif model.predict(new_padded) < 50:
+elif model.predict(new_padded) < 0.5:
     print('\n That sounds sincere')
 
 # print(model.predict(new_padded))
