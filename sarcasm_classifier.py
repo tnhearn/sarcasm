@@ -43,15 +43,13 @@ train_padded = pad_sequences(
     train_sequences,
     padding = 'post',
     maxlen = MAX_LENGTH,
-    truncating = 'post'
-    )
+    truncating = 'post')
 test_sequences = tokenizer.texts_to_sequences(X_test)
 test_padded = pad_sequences(
     test_sequences,
     padding = 'post',
     maxlen = MAX_LENGTH,
-    truncating = 'post'
-    )
+    truncating = 'post')
 print()
 print(train_padded[0])
 print(train_padded.shape)
@@ -69,17 +67,14 @@ model = tf.keras.Sequential([
     tf.keras.layers.Embedding(
         VOCAB_SIZE, 
         EMBEDDING_DIM, 
-        input_length = MAX_LENGTH
-        ),
+        input_length = MAX_LENGTH),
     tf.keras.layers.GlobalAveragePooling1D(),
     tf.keras.layers.Dense(
         24, 
-        activation = 'relu'
-        ),
+        activation = 'relu'),
     tf.keras.layers.Dense(
         1, 
-        activation = 'sigmoid'
-        )
+        activation = 'sigmoid')
 ])
 model.compile(
     loss = 'binary_crossentropy',
@@ -112,13 +107,21 @@ plot_graphs(history, "accuracy")
 plot_graphs(history, "loss")
 
 # Test model with some new sentences
-sentence = ["Are you really going to wear that?", 
-            "You are my oldest sister"]
-sequences = tokenizer.texts_to_sequences(sentence)
-padded = pad_sequences(
+new_sentence = [input("\n Check your sentence for sarcasm: ")]
+print("")
+# new_sentence = ["Are you really going to wear that?", 
+#             "You are my oldest sister"]
+sequences = tokenizer.texts_to_sequences(new_sentence)
+new_padded = pad_sequences(
     sequences, 
     maxlen = MAX_LENGTH, 
     padding = 'post', 
     truncating = 'post')
-print(model.predict(padded))
+
+if model.predict(new_padded) >= 50:
+    print('\n That sounds like sarcasm')
+elif model.predict(new_padded) < 50:
+    print('\n That sounds sincere')
+
+# print(model.predict(new_padded))
 
