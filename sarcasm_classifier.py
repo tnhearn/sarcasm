@@ -37,6 +37,13 @@ tokenizer.fit_on_texts(X_train)
 
 word_index = tokenizer.word_index
 
+# Build a small transformer network.
+vocab_size = 100
+network = nlp.networks.BertEncoder(
+    vocab_size=vocab_size, 
+    # The number of TransformerEncoderBlock layers
+    num_layers=3)
+
 MAX_LENGTH = 100
 train_sequences = tokenizer.texts_to_sequences(X_train)
 train_padded = pad_sequences(
@@ -70,6 +77,7 @@ model = tf.keras.Sequential([
         input_length = MAX_LENGTH,
         mask_zero = True),
     # tf.keras.layers.GlobalAveragePooling1D(),
+    tf.keras.layers.RNN(cell, kwargs)
     tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(
         16, 
         activation = 'tanh',
